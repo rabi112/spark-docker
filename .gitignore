@@ -1,0 +1,4 @@
+target/
+lib/
+project/target/
+spark-warehouse/
