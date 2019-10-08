@@ -1,0 +1,36 @@
+version: "3.3"
+services:
+  spark-master:
+    image: spark-master:latest
+    ports:
+      - "8080:8080"
+      - "7077:7077"
+    volumes:
+      -  ${bdb_out}:/opt/bdb/out
+    environment:
+      - "SPARK_LOCAL_IP=spark-master"
+  spark-worker:
+    image: spark-worker:latest
+    ports:
+      - "8081:8081"
+    volumes:
+      -  ${bdb_out}:/opt/bdb/out
+      -  ${bdb_out}/work:/spark/work
+    depends_on:
+      - spark-master
+    environment:
+      - SPARK_MASTER=spark://spark-master:7077
+      - SPARK_WORKER_CORES=4
+      - SPARK_WORKER_MEMORY=6G
+  spark-submit:
+    image: spark-submit:latest
+    depends_on:
+      - spark-worker
+    environment:
+      - SPARK_APPLICATION_JAR_LOCATION=/opt/bdb/jars/mqtt-assembly-0.1.jar
+      - SPARK_APPLICATION_MAIN_CLASS=com.bdb.mqtt.MQTTSubscriberApp
+      - SPARK_DRIVER_CORES=1
+      - SPARK_DRIVER_MEMORY=1G
+      - SPARK_EXECUTOR_MEMORY=2G
+      - SPARK_EXECUTOR_CORES=1
+
